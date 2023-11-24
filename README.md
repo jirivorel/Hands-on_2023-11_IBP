@@ -16,14 +16,15 @@ Information given in this course is current as of 30th November 2023.
   * [Data and tools](#data-and-tools)
   * [Useful links](#useful-links)
 * [Log in to the frontend server](#log-in-to-the-frontend-server)
+* [Basic orientation in your home directory](#basic-orientation-in-your-home-directory)
 
 # Introduction
 
 ## Aims
 
-This tutorial, in the brief form of a hands-on course, shows how to process and analyse sequencing data using [MetaCentrum NGI](https://www.metacentrum.cz/en/index.html) (National Grid Infrastructure). Participants will be introduced to the basic usage of MetaCentrum, e.g. how to [log in on the frontend server](https://docs.metacentrum.cz/access/log-in/), how to [manipulate data](https://docs.metacentrum.cz/data/data-within/) properly, how to [start an interactive or batch job](https://docs.metacentrum.cz/basics/jobs/), and how to [display graphical output](https://docs.metacentrum.cz/software/graphical-access/).
+This tutorial, in the brief form of a hands-on course, shows how to process and analyse sequencing data using [MetaCentrum NGI](https://www.metacentrum.cz/en/index.html) (National Grid Infrastructure). Participants will be introduced to the basic usage of MetaCentrum, e.g. how to [log in to the frontend server](https://docs.metacentrum.cz/access/log-in/), how to [manipulate data](https://docs.metacentrum.cz/data/data-within/) properly, how to [start an interactive or batch job](https://docs.metacentrum.cz/basics/jobs/), and how to [display graphical output](https://docs.metacentrum.cz/software/graphical-access/).
 
-In the practical part of the course, we will use publicly available sequencing data (produced by [Illumina](https://www.illumina.com/) and [Oxford Nanopore](https://nanoporetech.com/) platforms) for the hybrid assembly of the bacterial genome - specifically, _Escherichia coli_ strain A0 34/86 (as described in this [paper](https://journals.asm.org/doi/10.1128/mra.00363-23)). Unfortunatelly, processing raw reads, genome assembly and following gene prediction and annotation are processes (especially in the case of larger eukaryotic genomes) that often require time-consuming tuning for optimal parameters and considerable hardware resources.
+In the practical part of the course, we will use publicly available sequencing data (produced by [Illumina](https://www.illumina.com/) and [Oxford Nanopore](https://nanoporetech.com/) platforms) for the _de novo_ hybrid assembly of the bacterial genome - specifically, _Escherichia coli_ strain A0 34/86 (as described in this [paper](https://journals.asm.org/doi/10.1128/mra.00363-23)). Unfortunatelly, processing raw reads, genome assembly and following gene prediction and annotation are processes (especially in the case of larger eukaryotic genomes) that often require time-consuming tuning for optimal parameters and considerable hardware resources.
 
 > [!IMPORTANT]  
 > **This course does not aim to create a perfect genome assembly!**
@@ -39,15 +40,15 @@ In the practical part of the course, we will use publicly available sequencing d
 
 To get the full potential of this course, each of the participants should be (or should have):
   -  **be a registered user of MetaCentrum** (due to the process involving application approval and propagation of a new account, it is necessary to apply for an account no later than a day before the course).
-  -  **know login information - username and password** (which were created during the application process).
+  -  **know login information - username and password** (created during the application process).
   -  **have a laptop with a working internet connection.**
-  -  **be able to log in to the remote server (via ssh protocol).**
+  -  **be able to log in to the remote server (via SSH protocol).**
   
 > [!NOTE]
 > This course is designed for participants with no command-line (CLI) knowledge. But this knowledge is recommended. All commands and shell scripts used during the course are pasted below and can be directly copied.
 
 > [!NOTE]
-> No data and software tools need to be downloaded/installed before the course. Data will be downloaded during the course, and all software tools (freely available for non-commercial usage) are already available for Metacentrum users. 
+> No data and software tools need to be downloaded/installed before the course. Data will be downloaded during the course, and all software tools (freely available for non-commercial usage) are already available for MetaCentrum users. 
 
 ## Dedicated resources
 
@@ -78,12 +79,35 @@ The following data and software tools will be used during the course:
 
 # Log in to the frontend server
 
-As most computing/data centres, Metacentrum nodes are running on Linux (mostly on [Debian](https://www.debian.org/)). Linux is preferred for its stability, security, speed, adaptability and compatibility. Additionally, scientific tools are primarily designed and optimized for Linux.
+Like most computing/data centres, MetaCentrum nodes run exclusively on Linux (mainly [Debian](https://www.debian.org/)). Linux is preferred for its stability, security, speed, adaptability, and compatibility. Additionally, software tools for life sciences are primarily designed and optimised for Linux.
 
-> [!WARNING]  
-> MetaCentum uses [Kerberos](https://docs.metacentrum.cz/advanced/kerberos/) 
+We will use the one login server known as [frontend](https://docs.metacentrum.cz/basics/concepts/#frontends-storages-homes) for logging in. Frontend servers are accessible via SSH protocol and serve as a main gateway for the entire infrastructure.
+
+> [!WARNING]
+> Frontend servers are virtual machines with limited computational power and primarily should serve for brief data check, preparation of the shell scripts for batch jobs, short compilations, etc. Please do not use them for long and/or demanding calculations (rather use an [interactive job](https://docs.metacentrum.cz/basics/jobs/#interactive-job))!
+
+> [!NOTE]
+> MetaCentrum can be accessed worldwide. We do not apply any geoblocking.
+
+The following diagram shows the position of the frontend servers in the context of other parts of the grid infrastructure. 
 
 <p align="center"><img src="https://tacc.github.io/ctls2017/resources/hpc_schematic.png"></p>
 
+In this tutorial, we will use frontend `skirit` with an address `skirit.ics.muni.cz`, alternatively `skirit.metacentrum.cz`. Skirit frontend runs on Debian 11 and has a home directory mounted on the storage `brno2` (accessible as `/storage/brno2/home/user_name/`).
 
 
+
+
+> [!IMPORTANT]  
+> MetaCentrum for log in does not fully support traditional authentication with SSH keys. 
+> MetaCentum uses the [Kerberos](https://docs.metacentrum.cz/advanced/kerberos/) system for authentication, which requires a **username** and **password**.
+
+> [!TIP]
+> You can [install and configure Kerberos](https://docs.metacentrum.cz/advanced/kerberos/#install-kerberos) on your personal computer (available for all operating systems). It allows you to generate a local Kerberos ticket with a lifetime of up to 24 hours and log in to Metacentrum nodes without typing a password for this period.
+
+
+
+
+
+
+# Basic orientation in your home directory
