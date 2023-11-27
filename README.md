@@ -17,6 +17,8 @@ Information given in this course is current as of 30th November 2023.
   * [Useful links](#useful-links)
 * [Log in to the frontend server](#log-in-to-the-frontend-server)
 * [Basic orientation in your home directory](#basic-orientation-in-your-home-directory)
+* [System of software modules](#system-of-software-modules)
+* [Download raw data from NCBI SRA](#download-raw-data-from-ncbi-sra)
 
 # Introduction
 
@@ -45,7 +47,7 @@ To get the full potential of this course, each of the participants should be (or
   -  **be able to log in to the remote server (via SSH protocol).**
   
 > [!NOTE]
-> This course is designed for participants with no command-line (CLI) knowledge. But this knowledge is recommended. All commands and shell scripts used during the course are pasted below and can be directly copied.
+> This course is designed for participants without command-line (CLI) knowledge. But this knowledge is recommended. All commands and shell scripts used during the course are pasted below and can be directly copied.
 
 > [!NOTE]
 > No data and software tools need to be downloaded or installed before the course. Data will be downloaded during the course, and all software tools (freely available for non-commercial usage) are already available for MetaCentrum users. 
@@ -102,9 +104,7 @@ In this tutorial, we will use frontend `skirit` with an address `skirit.metacent
 > [!TIP]
 > You can [install and configure Kerberos](https://docs.metacentrum.cz/advanced/kerberos/#install-kerberos) on your personal computer (available for all operating systems). It allows you to generate a local Kerberos ticket with a lifetime of up to 24 hours and log in to Metacentrum nodes without typing a password for this period.
 
-Windows users can use (for example) an SSH client  Putty (as described [here](https://docs.metacentrum.cz/software/graphical-access/#connect-with-putty-in-windows)).
-
-CLI users can open their terminals and type the following command (**replace `user_name` with your real MetaCentrum username**) and password.
+Windows users can use (for example) an SSH client PuTTY (as described [here](https://docs.metacentrum.cz/software/graphical-access/#connect-with-putty-in-windows)). CLI users can open their terminals and type the following command (**replace a string `user_name` with your actual MetaCentrum username**) and then your password.
 
 ```shell
 ssh user_name@skirit.metacentrum.cz
@@ -115,17 +115,32 @@ ssh user_name@skirit.metacentrum.cz
 > [!IMPORTANT]  
 > **Do not share your MetaCentrum password with someone else.** It could be interpreted as violating the terms of use, and your account could be banned.
 
+When you see the overview of your quotas on individual storages, you have been successfully logged in. Expand the following section for comparison. The colour scheme will vary and is a matter of personal terminal settings.
 
-
-
-
-
-
+<details>
+<summary>Expand the following section to see what a successful log in looks like.</summary>
+<p align="center"><img src="./figs/02_login.png"></p>
+</details>
 
 # Basic orientation in your home directory
 
+After successful log in, you are (by default) located in your home directory. You can execute the command `pwd` (_print working directory_) to print out an absolute path of your position in the system.
+
+```shell
+pwd
+```
+Your current location determines which files and folders you can see. Use the command `ls` (_list_) to see what files and folders are available at this location, i.e., in your home directory.
+
+```shell
+ls
+```
 
 
+
+# System of software modules 
+
+
+# Download raw data from NCBI SRA
 
 
 
