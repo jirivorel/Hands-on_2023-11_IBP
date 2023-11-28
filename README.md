@@ -54,10 +54,10 @@ To get the full potential of this course, each of the participants should be (or
 
 ## Dedicated resources
 
-As is typical for grid computing, all submitted jobs are sorted into specific [queues](https://docs.metacentrum.cz/advanced/queues-in-meta/) (mainly based on the amount of requested resources). The combination of the required resources and the current infrastructure load determines the delay between the job submission and the start of the calculation. Very demanding jobs can wait in the queue for several days before all the required resources are free. We will use a special queue `XYZ` reserved only for this course to avoid this delay. This queue employs two ida machines (`ida7` and `ida25`), each with 20 CPU cores and 128 GB RAM.
+As is typical for grid computing, all submitted jobs are sorted into specific [queues](https://docs.metacentrum.cz/advanced/queues-in-meta/) (mainly based on the amount of requested resources). The combination of the required resources and the current infrastructure load determines the delay between the job submission and the start of the calculation. Very demanding jobs can wait in the queue for several days before all the required resources are free. We will use a special queue `MetaSeminar` reserved for this course to avoid this delay. This queue employs two ida machines (`ida7` and `ida25`), each with 20 CPU cores and 128 GB RAM.
 
 > [!IMPORTANT]  
-> Each job submitted during this course needs to target this dedicated queue. As you will see later, interactive jobs will include a parameter `-q XYZ`, and batch jobs will include the line `#PBS -q XYZ`. In both cases, the job scheduler [PBSPro](https://docs.metacentrum.cz/basics/concepts/#pbs-servers) will send jobs to this specified queue.
+> Each job submitted during this course needs to target this dedicated queue. As you will see later, interactive jobs will include a parameter `-q MetaSeminar` and batch jobs will include a line `#PBS -q MetaSeminar`. In both cases, the job scheduler [PBSPro](https://docs.metacentrum.cz/basics/concepts/#pbs-servers) will send jobs to this specified queue.
 
 ## Data and tools
 
@@ -86,16 +86,16 @@ Like most computing/data centres, MetaCentrum nodes run exclusively on Linux (ma
 We will use one of the login servers known as [frontend](https://docs.metacentrum.cz/basics/concepts/#frontends-storages-homes) for logging in. Frontend servers are accessible via SSH protocol and serve as a main gateway for the entire infrastructure.
 
 > [!WARNING]
-> Frontend servers are virtual machines with limited computational power and primarily serve for basic data inspection and manipulation, preparation of the shell scripts for batch jobs, short compilations, etc. Please do not use them for long and/or demanding calculations (rather use an [interactive job](https://docs.metacentrum.cz/basics/jobs/#interactive-job)).
+> Frontend servers are virtual machines with limited computational power and primarily serve for basic data inspection and manipulation, preparation of the shell scripts for batch jobs, short compilations, etc. Please do not use them for long and/or demanding calculations (rather, use an [interactive job](https://docs.metacentrum.cz/basics/jobs/#interactive-job)).
 
 > [!NOTE]
 > MetaCentrum can be accessed worldwide. We do not apply any geoblocking.
 
-The following diagram shows the position of the frontend servers (labelled as **Login nodes**) in the context of other parts of the grid infrastructure. 
+The following diagram shows the frontend servers' position (labelled as **Login nodes**) in the context of other parts of the grid infrastructure. 
 
 <p align="center"><img src="https://tacc.github.io/ctls2017/resources/hpc_schematic.png"></p>
 
-In this tutorial, we will use frontend `skirit` with an address `skirit.metacentrum.cz` for logging in. Skirit frontend runs on Debian 11 and has a home directory mounted on the storage `brno2` (accessible as `/storage/brno2/home/user_name/`).
+In this tutorial, we will use frontend `skirit` with an address `skirit.metacentrum.cz` for logging in. Skirit frontend runs on Debian 11 and has a home directory mounted on the storage `brno2` (accessible as `/storage/brno2/home/$USER/`).
 
 > [!IMPORTANT]  
 > MetaCentrum for log in does not fully support traditional authentication with SSH keys. 
@@ -112,30 +112,135 @@ ssh user_name@skirit.metacentrum.cz
 > [!NOTE]  
 > No characters appear during the password typing in the terminal. This is a standard security behaviour.
 
-> [!IMPORTANT]  
+> [!IMPORTANT]
 > **Do not share your MetaCentrum password with someone else.** It could be interpreted as violating the terms of use, and your account could be banned.
 
 When you see the overview of your quotas on individual storages, you have been successfully logged in. Expand the following section for comparison. The colour scheme will vary and is a matter of personal terminal settings.
 
 <details>
-<summary>Expand the following section to see what a successful log in looks like.</summary>
+<summary>Expand the following section to see what a successful login looks like.</summary>
 <p align="center"><img src="./figs/02_login.png"></p>
 </details>
 
 # Basic orientation in your home directory
 
-After successful log in, you are (by default) located in your home directory. You can execute the command `pwd` (_print working directory_) to print out an absolute path of your position in the system.
+In Metacentrum, we lack the visual interface typical for desktop computers. Instead, we use text commands. The following table shows a few commands for fundamental work with the Linux command line. Most of them we will use further during the course.
+
+> [!TIP]
+> There are hundreds of other commands. You can find more comprehensive tutorials related to this topic online — for example, [here](https://www.freecodecamp.org/news/the-linux-commands-handbook/).
+
+| Command | Action|
+| ------------- | -------------|
+| `pwd` | Shows the current working directory’s path. |
+| `ls` | Lists a directory’s content. |
+| `ls -lh` | Lists a directory’s content in column and human-readable format. |
+| `mkdir` | Creates a new directory. |
+| `cat` | Displays the content of a file. |
+| `cd` | Changes the working directory. |
+| `cp` | Copies files. |
+| `cp -r` | Copies files and directories with their content. |
+| `mv` | Moves or renames files and directories. |
+| `rm` | Removes a file. |
+| `rmdir` | Removes an empty directory. |
+| `rm -r` | Removes directory with its content. |
+| `touch` | Creates a file without content. |
+| `.` or `./`  | Refers to the present location. |
+| `..` or `../` | Refers to the parent directory. |
+
+After successful log in, you will be (by default) located in your home directory. You can execute the command `pwd` to print an absolute path of your position in the system.
 
 ```shell
 pwd
 ```
-Your current location determines which files and folders you can see. Use the command `ls` (_list_) to see what files and folders are available at this location, i.e., in your home directory.
+
+Your current location determines which files and directories you can see/access/use - which are located at the same position in the system. Execute the command `ls` to see what files and directories are available at this location, i.e., in your home directory.
 
 ```shell
 ls
 ```
 
+We can create a new directory named `test_directory`. If you do not like this name, you can choose a different one :wink:
 
+```shell
+mkdir test_directory
+```
+
+When the folder `test_directory` was created, execute these two commands and compare what was printed in the terminal.
+
+```shell
+ls
+```
+```shell
+ls -l
+```
+
+> [!NOTE]  
+> The terms **folder** and **directory** are interchangeable.
+
+We will also need to edit text files (specifically the shell scripts for the batch jobs). We can use the `touch` command to create an empty file. Let's name this file as `test_file.txt`.
+
+```shell
+touch test_file.txt
+```
+
+You can execute the `ls` or `ls -lh` command again (depending on your preference) to check whether file `test_file.txt` was created successfully.
+
+<details>
+<summary>Expand this section and compare results with me.</summary>
+ 
+```shell
+(BULLSEYE)vorel@skirit:~$ ls
+test_directory	test_file.txt
+(BULLSEYE)vorel@skirit:~$ ls -lh
+total 512
+drwxr-xr-x 2 vorel meta 4.0K Nov 28 15:21 test_directory
+-rw-r--r-- 1 vorel meta    0 Nov 28 15:25 test_file.txt
+```
+</details>
+
+Let's use the text editor [nano](https://www.nano-editor.org/) to open and further edit the text file `test_file.txt`. 
+
+```shell
+nano test_file.txt
+```
+
+> [!TIP]
+> Use the `tab` key to autocomplete file or folder names. 
+
+> [!NOTE]  
+> Metacentrum also offers other editors, such as `vi`, `vim` or `mcedit`. 
+
+You can start typing any text when the `nano` editor is open. When you are done, press the keys `ctrl` and `x` simultaneously. You will be asked if you want to save changes (`Save modified buffer?`). Press `y`, and as we want to overwrite the original file `test_file.txt`, press the `enter` key.
+
+When you want to print the content of the text file in the terminal, try to use the command `cat`.
+
+```shell
+cat test_file.txt
+```
+
+> [!WARNING]
+> The `cat` command prints the entire content of a file in the terminal at once. Therefore, it is not a suitable way to view very long text files. More friendly is the `less` command, which shows the content of a text file by one page (one screen) at a time.
+
+Finally, we can try to rename the file `test_file.txt` to `test_file_renamed.txt` and move it into the  directory `test_directory`.
+
+> [!NOTE]  
+> Remember that the `mv` command can be used for renaming and also for moving files and folders.
+
+```shell
+mv test_file.txt test_file_renamed.txt
+```
+```shell
+mv test_file_renamed.txt test_directory
+```
+
+And in the last step of this chapter, we can check whether the renamed file `test_file_renamed.txt` was moved to the correct position, and if yes, we can delete folder `test_directory` with its content because we will have no further use for it. 
+
+```shell
+ls test_directory
+```
+```shell
+rm -r test_directory
+```
 
 # System of software modules 
 
