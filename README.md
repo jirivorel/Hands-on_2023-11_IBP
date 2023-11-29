@@ -21,12 +21,13 @@ Information given in this course is current as of 30th November 2023.
 * [Raw reads and quality control](#raw-reads-and-quality-control)
 * [Data manipulation](#data-manipulation)
    * [Download via terminal](#download-via-terminal)
+   * [Download via FTP or SFTP client](#download-via-ftp-or-sftp-client)
 
 # Introduction
 
 ## Aims
 
-This tutorial, in the brief form of a hands-on course, shows how to process and analyse sequencing data using [MetaCentrum NGI](https://www.metacentrum.cz/en/index.html) (National Grid Infrastructure). Participants will be introduced to the basic usage of MetaCentrum, e.g. how to [log in to the frontend server](https://docs.metacentrum.cz/access/log-in/), how to [manipulate data](https://docs.metacentrum.cz/data/data-within/) properly, how to [start an interactive or batch job](https://docs.metacentrum.cz/computing/run-basic-job/), and how to [display graphical output](https://docs.metacentrum.cz/software/graphical-access/).
+This tutorial, in the brief form of a hands-on course, shows how to process and analyse sequencing data using [MetaCentrum NGI](https://www.metacentrum.cz/en/index.html) (National Grid Infrastructure). Participants will be introduced to the basic usage of MetaCentrum, e.g. how to [log in to the frontend server](https://docs.metacentrum.cz/access/log-in/), how to [manipulate data](https://docs.metacentrum.cz/data/data-within/) properly, and how to [start an interactive or batch job](https://docs.metacentrum.cz/computing/run-basic-job/).
 
 In the practical part of the course, we will use publicly available sequencing data (produced by [Illumina](https://www.illumina.com/) and [Oxford Nanopore](https://nanoporetech.com/) platforms) for the _de novo_ hybrid assembly of the bacterial genome - specifically, _Escherichia coli_ strain A0 34/86 (as described in this [paper](https://journals.asm.org/doi/10.1128/mra.00363-23)). Unfortunatelly, processing raw reads, genome assembly and following gene prediction and annotation are processes (especially in the case of larger eukaryotic genomes) that often require time-consuming tuning for optimal parameters and considerable hardware resources.
 
@@ -347,6 +348,9 @@ fasterq-dump -e 2 -p -x SRR24321377 SRR24321378
 | `SRR24321377` | Oxford Nanopore reads. |
 | `SRR24321378` | Illumina paired-end reads. |
 
+> [!IMPORTANT]  
+> Oxford Nanopore sequencers produce data in `fast5` format that contains additional information besides sequence data. In this tutorial, we download data already converted into `fastq` format.
+
 We can check the content of the scratch directory via the `ls -lh` command. Do not use the `cat` command to explore the content of individual `fastq` files!
 
 We can also print out the first ten lines from each file, check the data visually and count the number of sequences in each file.
@@ -448,7 +452,7 @@ exit
 
 # Data manipulation
 
-From the previous chapter, we have two types of data (reads and files with quality information), and we will use them for:
+From the previous chapter, we have two types of data (reads and files with quality information), and we will use them as examples for:
 - download the data from MetaCentrum to the local computer.
 - upload the data to MetaCentrum.
 - transfer the data between storages.
@@ -457,42 +461,36 @@ From the previous chapter, we have two types of data (reads and files with quali
 > [!IMPORTANT]  
 > How to effectively manipulate the data is comprehensively described [here](https://docs.metacentrum.cz/data/data-within/). 
 
+> [!TIP]
+> It is a good practice to compress larger data volumes (into `.zip`, `.gz`, `.tar.gz`, etc.) before manipulation.
+
 Firstly, we will download the results from the quality check step. This means we will download the data from the MetaCentrum storage `plzen1` to the local computer.
 
 In general, small files and folders can be downloaded/uploaded through the frontend servers. For bigger volumes of data, it is recommended to [access storage servers directly](https://docs.metacentrum.cz/data/data-within/#large-data-handling). A list of all MetaCentrum storage servers is deposited [here](https://wiki.metacentrum.cz/wiki/NFS4_Servery).
 
 ## Download via terminal
 
-The easiest way to download data from the remote server is via a terminal. Let's execute a few commands and discuss what is different.
-
-```shell
-scp vorel@storage-plzen1.metacentrum.cz:Illumina_raw_SRR24321378_1_fastqc.html .
-# alternatively:
-scp vorel@nympha.metacentrum.cz:Illumina_raw_SRR24321378_1_fastqc.html .
-```
-```shell
-scp vorel@storage-plzen1.metacentrum.cz:./Illumina_raw_SRR24321378_2_fastqc.html .
-# alternatively:
-scp vorel@nympha.metacentrum.cz:./Illumina_raw_SRR24321378_2_fastqc.html .
-```
-
-General syntax with path is `scp user_name@server_name:/path/to/any/file/ /path/where/to/save/it/on/my/computer`. `scp` is a traditional Linux command with [many tutorials on how to use it](https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/).
+The easiest way to download data from the remote server is via a terminal. Let's execute a few commands:
 
 ```shell
 scp vorel@storage-plzen1.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
 # alternatively:
 scp vorel@nympha.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
 ```
+
 ```shell
 scp -r vorel@storage-plzen1.metacentrum.cz:ont_outdir .
 # alternatively:
 scp -r vorel@nympha.metacentrum.cz:ont_outdir .
 ```
+
 ```shell
 scp vorel@storage-plzen1.metacentrum.cz:ONT_raw_SRR24321377.fastq .
 # alternatively:
 scp vorel@nympha.metacentrum.cz:ONT_raw_SRR24321377.fastq .
 ```
+
+General syntax with path is `scp user_name@server_name:/path/to/any/file/ /path/where/to/save/it/on/my/computer`. `scp` is a traditional Linux command with [many tutorials on how to use it](https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/).
 
 > [!IMPORTANT]  
 > **The directory structure on NFS4 storages and frontend servers is not identical!**
@@ -508,4 +506,20 @@ scp vorel@nympha.metacentrum.cz:ONT_raw_SRR24321377.fastq .
 > Remote working directory: /home/vorel
 > Illumina_raw_SRR24321378_1.fastq Illumina_raw_SRR24321378_1_fastqc.html
 > ```
+
+## Download via FTP or SFTP client
+
+Some users prefer (or need) graphical FTP/SFTP clients for interactive access. Such clients are, for example, [WinSCP](https://winscp.net/eng/index.php), [FileZilla](https://filezilla-project.org/) or [CyberDuck](https://cyberduck.io/). All these clients need to be correctly configured before use. To access the MetaCentrum, fill in:
+
+- select FTP or SFTP protocol
+- set port `22`
+- insert your username and password
+- server address (use `nympha.metacentrum.cz` in this tutorial)
+
+An example below shows a configuration of CyberDuck to access nympha frontend. The access point is, by default, set as a home directory (`/storage/plzen1/home/vorel/`).
+
+<p align="center"><img src="./figs/03_cyberduck.png"></p>
+
+
+
 
