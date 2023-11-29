@@ -19,6 +19,7 @@ Information given in this course is current as of 30th November 2023.
 * [Basic orientation in your home directory](#basic-orientation-in-your-home-directory)
 * [System of software modules](#system-of-software-modules)
 * [Raw reads and quality control](#raw-reads-and-quality-control)
+* [Data manipulation](#data-manipulation)
 
 # Introduction
 
@@ -97,6 +98,9 @@ The following diagram shows the frontend servers' position (labelled as **Login 
 <p align="center"><img src="https://tacc.github.io/ctls2017/resources/hpc_schematic.png"></p>
 
 In this tutorial, we will use frontend `nympha` with an address `nympha.metacentrum.cz` for logging in. Nympha frontend runs on Debian 11 and has a home directory mounted on the storage `plzen1` (accessible as `/storage/plzen1/home/$USER/`).
+
+> [!NOTE]  
+> Variable USER (`$USER`) is automatically set after log in and contains the real username.
 
 > [!IMPORTANT]  
 > MetaCentrum for log in does not fully support traditional authentication with SSH keys. 
@@ -395,7 +399,7 @@ module rm openjdk
 | `openjdk` | Module for open source java. |
 | `-t 2` | Uses two threads. |
 
-Statistic graphs produced by FastQC are saved as `html` files, which can be downloaded and opened in a web browser on your local computer. Before proceeding, we will also perform quality control for Oxford Nanopore reads. We will use the NanoPlot tool, which can be installed through a [Mamba](https://github.com/mamba-org/mamba) package manager. In MetaCentrum, it is available as a module `mambaforge`.
+Statistic graphs produced by FastQC are saved as `html` files, which can be downloaded and opened in a web browser on your local computer. Before proceeding, we will also perform quality control for Oxford Nanopore reads. We will use the NanoPlot tool, which can be installed through a [Mamba](https://github.com/mamba-org/mamba) package manager. In MetaCentrum, it is available as a module called `mambaforge`.
 
 > [!NOTE]  
 > [Conda](https://docs.conda.io/en/latest/) and [Mamba](https://github.com/mamba-org/mamba) package managers are very popular tools which allow fast and fully automated installations of various software. Each software is installed in a separate environment to avoid conflicts with other tools. In MetaCentrum, Mamba is preferred over Conda because it is designed to be faster and more efficient. Installations through Mamba are mostly [straightforward and non-problematic](https://docs.metacentrum.cz/software/install-software/#conda-packages).
@@ -418,9 +422,36 @@ mamba deactivate && mamba deactivate
 | `-o` | Sets the name of the directory with results. |
 | `-c` | Sets the colour of produced graphs. |
 | `--plots` | Specifies the plot style. |
-| `--50` | Shows N50 marm. |
+| `--50` | Shows N50 mark. |
 | `--fastq` | Input file in a fastq format. |
 | `&&` | Executes the second command when the first one ends successfully. |
+
+Finally, we can move results from the scratch directory to the home directory (`/storage/plzen1/home/$USER`) for further examination. 
+
+```shell
+cp Illumina_raw_SRR24321378_*.fastq /storage/plzen1/home/$USER
+cp ONT_raw_SRR24321377.fastq /storage/plzen1/home/$USER
+cp Illumina_raw_SRR24321378_*_fastqc.html /storage/plzen1/home/$USER
+cp -r ont_outdir /storage/plzen1/home/$USER
+```
+
+We no longer need the remaining content of the scratch directory. So we call the `clean_scratch` utility, which will remove all remaining data, and then we execute the `exit` command to quit the running interactive job.
+
+```shell
+clean_scratch
+exit
+```
+> [!IMPORTANT]  
+> **Scratch directories are not backed up**! Once data is deleted, it is not possible to restore it.
+
+# Data manipulation
+
+
+
+
+
+
+
 
 
 
