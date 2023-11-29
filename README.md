@@ -20,6 +20,7 @@ Information given in this course is current as of 30th November 2023.
 * [System of software modules](#system-of-software-modules)
 * [Raw reads and quality control](#raw-reads-and-quality-control)
 * [Data manipulation](#data-manipulation)
+   * [Download via terminal](#download-via-terminal)
 
 # Introduction
 
@@ -150,6 +151,7 @@ In Metacentrum, we lack the visual interface typical for desktop computers. Inst
 | `rmdir` | Removes an empty directory. |
 | `rm -r` | Removes directory with its content. |
 | `touch` | Creates a file without content. |
+| `scp` | Transfers data. |
 | `.` or `./`  | Refers to the present location. |
 | `..` or `../` | Refers to the parent directory. |
 
@@ -446,13 +448,64 @@ exit
 
 # Data manipulation
 
+From the previous chapter, we have two types of data (reads and files with quality information), and we will use them for:
+- download the data from MetaCentrum to the local computer.
+- upload the data to MetaCentrum.
+- transfer the data between storages.
+- back up the data.
 
+> [!IMPORTANT]  
+> How to effectively manipulate the data is comprehensively described [here](https://docs.metacentrum.cz/data/data-within/). 
 
+Firstly, we will download the results from the quality check step. This means we will download the data from the MetaCentrum storage `plzen1` to the local computer.
 
+In general, small files and folders can be downloaded/uploaded through the frontend servers. For bigger volumes of data, it is recommended to [access storage servers directly](https://docs.metacentrum.cz/data/data-within/#large-data-handling). A list of all MetaCentrum storage servers is deposited [here](https://wiki.metacentrum.cz/wiki/NFS4_Servery).
 
+## Download via terminal
 
+The easiest way to download data from the remote server is via a terminal. Let's execute a few commands and discuss what is different.
 
+```shell
+scp vorel@storage-plzen1.metacentrum.cz:Illumina_raw_SRR24321378_1_fastqc.html .
+# alternatively:
+scp vorel@nympha.metacentrum.cz:Illumina_raw_SRR24321378_1_fastqc.html .
+```
+```shell
+scp vorel@storage-plzen1.metacentrum.cz:./Illumina_raw_SRR24321378_2_fastqc.html .
+# alternatively:
+scp vorel@nympha.metacentrum.cz:./Illumina_raw_SRR24321378_2_fastqc.html .
+```
 
+General syntax with path is `scp user_name@server_name:/path/to/any/file/ /path/where/to/save/it/on/my/computer`. `scp` is a traditional Linux command with [many tutorials on how to use it](https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/).
 
+```shell
+scp vorel@storage-plzen1.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
+# alternatively:
+scp vorel@nympha.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
+```
+```shell
+scp -r vorel@storage-plzen1.metacentrum.cz:ont_outdir .
+# alternatively:
+scp -r vorel@nympha.metacentrum.cz:ont_outdir .
+```
+```shell
+scp vorel@storage-plzen1.metacentrum.cz:ONT_raw_SRR24321377.fastq .
+# alternatively:
+scp vorel@nympha.metacentrum.cz:ONT_raw_SRR24321377.fastq .
+```
 
+> [!IMPORTANT]  
+> **The directory structure on NFS4 storages and frontend servers is not identical!**
+> ```shell
+> $ ssh vorel@nympha.metacentrum.cz
+> $ pwd
+> /storage/plzen1/home/vorel
+> $ ls
+> Illumina_raw_SRR24321378_1.fastq	Illumina_raw_SRR24321378_2.fastq
+>
+> $ sftp vorel@storage-plzen1.metacentrum.cz
+> $ pwd
+> Remote working directory: /home/vorel
+> Illumina_raw_SRR24321378_1.fastq Illumina_raw_SRR24321378_1_fastqc.html
+> ```
 
