@@ -67,7 +67,7 @@ The following data and software tools will be used during the course:
  - Oxford Nanopore reads (NCBI SRA accession number: [SRX20115912](https://www.ncbi.nlm.nih.gov/sra/SRX20115912[accn])).
  - [NCBI SRA Toolkit](https://github.com/ncbi/sra-tools) for downloading sequencing data.
  - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) for quality control of Illumina reads
- - 
+ - [NanoPlot](https://github.com/wdecoster/NanoPlot) for quality control of Oxford Nanopore reads
 
 ## Useful links
  - [MetaCentrum terms and conditions](https://docs.metacentrum.cz/access/terms/)
@@ -130,7 +130,7 @@ In Metacentrum, we lack the visual interface typical for desktop computers. Inst
 > [!TIP]
 > There are hundreds of other commands. You can find more comprehensive tutorials related to this topic online — for example, [here](https://www.freecodecamp.org/news/the-linux-commands-handbook/).
 
-| Command | Action|
+| Command | Action |
 | ------------- | -------------|
 | `pwd` | Shows the current working directory’s path. |
 | `ls` | Lists a directory’s content. |
@@ -140,6 +140,7 @@ In Metacentrum, we lack the visual interface typical for desktop computers. Inst
 | `cd` | Changes the working directory. |
 | `cp` | Copies files. |
 | `cp -r` | Copies files and directories with their content. |
+| `head` | Prints first 10 lines. |
 | `mv` | Moves or renames files and directories. |
 | `rm` | Removes a file. |
 | `rmdir` | Removes an empty directory. |
@@ -291,24 +292,21 @@ programme ...
 We will start this hands-on course by downloading the raw sequencing data from the [NCBI Sequence Read Archive](https://www.ncbi.nlm.nih.gov/sra), followed by a quality check.
 
 The methodology will include:
-- starting the interactive job and moving to the [scratch directory](https://docs.metacentrum.cz/computing/scratch-storages/).
+- starting the interactive job and navigating to the [scratch directory](https://docs.metacentrum.cz/computing/scratch-storages/).
 - downloading the raw reads.
 - quality control of Illumina and Oxford Nanopore raw reads.
-- a visual assessment of graphs in [OnDemand service](https://docs.metacentrum.cz/software/ondemand/).
+- a visual assessment of produced graphs
 
 > [!IMPORTANT]  
-> Scratch storage is a storage for temporary files for running jobs. This storage should be used only during computations and should be freed immediately after your job ends. The location of the scratch directory is defined by a system variable `SCRATCHDIR`.
+> Scratch storage is a storage for temporary files and processed data of running jobs. This storage should be used only during computations and freed immediately after your job ends. The location of the scratch directory is defined by a system variable `SCRATCHDIR`.
 
-> [!TIP]
-> OnDemand is a service that enables users to access Metacentrum via a web browser. OnDemand allows access to files and directories using a graphical file manager, running graphical applications, or using a traditional terminal.
-
-First of all, we submit an interactive job. The meaning of individual parts of the command is explained below.
+First of all, we will submit an interactive job. The meaning of individual parts of the command is explained below.
 
 ```shell
 qsub -I -l select=1:ncpus=2:mem=10gb:scratch_local=20gb -l walltime=2:00:00 -q MetaSeminar
 ```
 
-| Parameter | Action|
+| Parameter | Action |
 | ------------- | -------------|
 | `qsub` | Command that submits jobs. |
 | `-I` | Declares that	the job	is to be run interactively. |
@@ -325,8 +323,104 @@ After starting the job, go to the scratch directory, defined as the variable SCR
 cd $SCRATCHDIR
 ```
 > [!IMPORTANT]  
-> Variable SCRATCHDIR (`$SCRATCHDIR`) is automatically set for each job. Always use `$SCRATCHDIR` in each job. The real path to the scratch directory is unknown before the start of the job because contains the job number. For example `/scratch/user_name/job_123456789.meta-pbs.metacentrum.cz`.
+> Variable SCRATCHDIR (`$SCRATCHDIR`) is automatically set for each job. Always use the `$SCRATCHDIR`. The real path to the scratch directory is unknown before the start of the job because it contains an assigned job number. For example, `/scratch/user_name/job_123456789.meta-pbs.metacentrum.cz`.
 
+For data download, we will use the **SRA Toolkit (version 3.0.3)**, which is a tool developed by [NCBI](https://www.ncbi.nlm.nih.gov/) for SRA data manipulation. In MetaCentrum, this tool is available as a [Conda environment](https://docs.metacentrum.cz/software/sw-list/conda-modules/).
+
+```shell
+module add conda-modules
+conda activate sra-tools-3.0.3
+fasterq-dump -e 2 -p -x SRR24321377 SRR24321378
+```
+
+| Flag | Meaning |
+| ------------- | -------------|
+| `-e 2` | Uses two threads. |
+| `-p` | Shows progress. |
+| `-x` | Prints more details. |
+| `SRR24321377` | Oxford Nanopore reads. |
+| `SRR24321378` | Illumina paired-end reads. |
+
+We can check the content of the scratch directory via the `ls -lh` command. Do not use the `cat` command to explore the content of individual `fastq` files!
+
+We can also print out the first ten lines from each file, check the data visually and count the number of sequences in each file.
+
+```shell
+head SRR24321377.fastq
+head SRR24321378_*.fastq
+for NAME in SRR24321377.fastq SRR24321378_1.fastq SRR24321378_2.fastq; do wc -l $NAME | awk '{print $1/4}'; done
+```
+And we can rename the downloaded files for better clarity.
+
+```shell
+mv SRR24321377.fastq ONT_raw_SRR24321377.fastq
+mv SRR24321378_1.fastq Illumina_raw_SRR24321378_1.fastq
+mv SRR24321378_2.fastq Illumina_raw_SRR24321378_2.fastq
+```
+We no longer need activated environment `sra-tools-3.0.3` or module `conda-modules`, so we can deactivate them.
+
+```shell
+conda deactivate
+module rm conda-modules
+```
+
+Let's continue with the **FastQC** utility to check the quality of Illumina raw reads. Try to execute the command `module ava fastqc/`. What is the latest FastQC version installed in MetaCentrum?
+
+> [!IMPORTANT]  
+> MetaCentrum users are allowed to [install software tools on their own](https://docs.metacentrum.cz/software/install-software/), preferably in their home directories. We fully support these activities. Our only condition is that there is no violation of the license rights of the given tool or the MetaCentrum terms and conditions.
+
+A newer version of FastQC is available. FastQC is distributed as a set of scripts and Java `jar` files. No compilation is needed. Thus, we will download, extract and use the latest version of FastQC. It is pretty simple, and everyone can make it :blush:
+
+```shell
+wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.12.1.zip
+unzip fastqc_v0.12.1.zip
+ls
+ls FastQC/
+ls -lh FastQC | grep fastqc
+chmod u+x FastQC/fastqc
+module add openjdk
+FastQC/fastqc -h
+FastQC/fastqc -t 2 Illumina_raw_SRR24321378_*
+ls -lh
+module rm openjdk
+```
+
+| Command/flag | Meaning |
+| ------------- | -------------|
+| `wget` | Downloads files from the web. |
+| `unzip` | Extract files from a ZIP archive. |
+| `\|` | Combines two commands. |
+| `grep` | Searches matching text. |
+| `chmod u+x` | Permits the user to execute a file. |
+| `openjdk` | Module for open source java. |
+| `-t 2` | Uses two threads. |
+
+Statistic graphs produced by FastQC are saved as `html` files, which can be downloaded and opened in a web browser on your local computer. Before proceeding, we will also perform quality control for Oxford Nanopore reads. We will use the NanoPlot tool, which can be installed through a [Mamba](https://github.com/mamba-org/mamba) package manager. In MetaCentrum, it is available as a module `mambaforge`.
+
+> [!NOTE]  
+> [Conda](https://docs.conda.io/en/latest/) and [Mamba](https://github.com/mamba-org/mamba) package managers are very popular tools which allow fast and fully automated installations of various software. Each software is installed in a separate environment to avoid conflicts with other tools. In MetaCentrum, Mamba is preferred over Conda because it is designed to be faster and more efficient. Installations through Mamba are mostly [straightforward and non-problematic](https://docs.metacentrum.cz/software/install-software/#conda-packages).
+
+```shell
+module add mambaforge
+mamba create -p /storage/plzen1/home/$USER/nanoplot-env -c bioconda nanoplot -y
+mamba activate /storage/plzen1/home/$USER/nanoplot-env
+NanoPlot --help
+NanoPlot -t 2 -o ont_outdir -c red --plots dot --N50 --fastq ONT_raw_SRR24321377.fastq
+mamba deactivate && mamba deactivate
+```
+
+| Command/flag | Meaning |
+| ------------- | -------------|
+| `mamba create -p...` | Crates a new environment in a specified location and installs a NanoPlot package from the Bioconda channel. |
+| `-y` | Automatically approves every action. |
+| `mamba activate` | Activates existing environment. |
+| `-t 2` | Uses two threads. |
+| `-o` | Sets the name of the directory with results. |
+| `-c` | Sets the colour of produced graphs. |
+| `--plots` | Specifies the plot style. |
+| `--50` | Shows N50 marm. |
+| `--fastq` | Input file in a fastq format. |
+| `&&` | Executes the second command when the first one ends successfully. |
 
 
 
