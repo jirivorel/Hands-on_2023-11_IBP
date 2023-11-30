@@ -74,10 +74,10 @@ The following data and software tools will be used during the course:
  - Illumina paired-end reads (NCBI SRA accession number: [SRX20115911](https://www.ncbi.nlm.nih.gov/sra/SRX20115911[accn])).
  - Oxford Nanopore reads (NCBI SRA accession number: [SRX20115912](https://www.ncbi.nlm.nih.gov/sra/SRX20115912[accn])).
  - [NCBI SRA Toolkit](https://github.com/ncbi/sra-tools) for downloading sequencing data.
- - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) for quality control of Illumina reads
- - [NanoPlot](https://github.com/wdecoster/NanoPlot) for quality control of Oxford Nanopore reads
- - [Unicycler](https://github.com/rrwick/Unicycler) for genome assembly
- - [QUAST](https://quast.sourceforge.net/) for assembly quality assessment
+ - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) for quality control of Illumina reads.
+ - [NanoPlot](https://github.com/wdecoster/NanoPlot) for quality control of Oxford Nanopore reads.
+ - [Unicycler](https://github.com/rrwick/Unicycler) for genome assembly.
+ - [QUAST](https://quast.sourceforge.net/) for assembly quality assessment.
 
 ## Useful links
  - [MetaCentrum terms and conditions](https://docs.metacentrum.cz/access/terms/)
