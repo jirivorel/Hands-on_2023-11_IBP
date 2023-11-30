@@ -22,6 +22,11 @@ Information given in this course is current as of 30th November 2023.
 * [Data manipulation](#data-manipulation)
    * [Download via terminal](#download-via-terminal)
    * [Download via FTP or SFTP client](#download-via-ftp-or-sftp-client)
+   * [Data upload](#data-upload)
+   * [Data transfer between storages](#data-transfer-between-storages)
+   * [Data backup and archiving](#data-backup-and-archiving)
+* [Genome assembly](#genome-assembly)
+
 
 # Introduction
 
@@ -71,6 +76,7 @@ The following data and software tools will be used during the course:
  - [NCBI SRA Toolkit](https://github.com/ncbi/sra-tools) for downloading sequencing data.
  - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) for quality control of Illumina reads
  - [NanoPlot](https://github.com/wdecoster/NanoPlot) for quality control of Oxford Nanopore reads
+ - [Unicycler](https://github.com/rrwick/Unicycler) for genome assembly
 
 ## Useful links
  - [MetaCentrum terms and conditions](https://docs.metacentrum.cz/access/terms/)
@@ -441,7 +447,7 @@ cp Illumina_raw_SRR24321378_*_fastqc.html /storage/plzen1/home/$USER
 cp -r ont_outdir /storage/plzen1/home/$USER
 ```
 
-We no longer need the remaining content of the scratch directory. So we call the `clean_scratch` utility, which will remove all remaining data, and then we execute the `exit` command to quit the running interactive job.
+We no longer need the remaining content of the scratch directory. So, we call the `clean_scratch` utility, which will remove all remaining data. Then, we execute the `exit` command to quit the running interactive job.
 
 ```shell
 clean_scratch
@@ -456,7 +462,7 @@ From the previous chapter, we have two types of data (reads and files with quali
 - download the data from MetaCentrum to the local computer.
 - upload the data to MetaCentrum.
 - transfer the data between storages.
-- back up the data.
+- archive and backup the data.
 
 > [!IMPORTANT]  
 > How to effectively manipulate the data is comprehensively described [here](https://docs.metacentrum.cz/data/data-within/). 
@@ -473,21 +479,21 @@ In general, small files and folders can be downloaded/uploaded through the front
 The easiest way to download data from the remote server is via a terminal. Let's execute a few commands:
 
 ```shell
-scp vorel@storage-plzen1.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
+scp user_name@storage-plzen1.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
 # alternatively:
-scp vorel@nympha.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
+scp user_name@nympha.metacentrum.cz:Illumina_raw_SRR24321378_\*_fastqc.html .
 ```
 
 ```shell
-scp -r vorel@storage-plzen1.metacentrum.cz:ont_outdir .
+scp -r user_name@storage-plzen1.metacentrum.cz:ont_outdir .
 # alternatively:
-scp -r vorel@nympha.metacentrum.cz:ont_outdir .
+scp -r user_name@nympha.metacentrum.cz:ont_outdir .
 ```
 
 ```shell
-scp vorel@storage-plzen1.metacentrum.cz:ONT_raw_SRR24321377.fastq .
+scp user_name@storage-plzen1.metacentrum.cz:ONT_raw_SRR24321377.fastq .
 # alternatively:
-scp vorel@nympha.metacentrum.cz:ONT_raw_SRR24321377.fastq .
+scp user_name@nympha.metacentrum.cz:ONT_raw_SRR24321377.fastq .
 ```
 
 General syntax with path is `scp user_name@server_name:/path/to/any/file/ /path/where/to/save/it/on/my/computer`. `scp` is a traditional Linux command with [many tutorials on how to use it](https://linuxize.com/post/how-to-use-scp-command-to-securely-transfer-files/).
@@ -509,16 +515,130 @@ General syntax with path is `scp user_name@server_name:/path/to/any/file/ /path/
 
 ## Download via FTP or SFTP client
 
-Some users prefer (or need) graphical FTP/SFTP clients for interactive access. Such clients are, for example, [WinSCP](https://winscp.net/eng/index.php), [FileZilla](https://filezilla-project.org/) or [CyberDuck](https://cyberduck.io/). All these clients need to be correctly configured before use. To access the MetaCentrum, fill in:
+Some users prefer (or need) graphical FTP/SFTP clients for interactive access. Such clients are, for example, [WinSCP](https://winscp.net/eng/index.php), [FileZilla](https://filezilla-project.org/) or [CyberDuck](https://cyberduck.io/). All these clients need to be correctly configured before use. To access the MetaCentrum, do the following:
 
 - select FTP or SFTP protocol
 - set port `22`
 - insert your username and password
 - server address (use `nympha.metacentrum.cz` in this tutorial)
 
-An example below shows a configuration of CyberDuck to access nympha frontend. The access point is, by default, set as a home directory (`/storage/plzen1/home/vorel/`).
+An example below shows a configuration of CyberDuck to access the nympha frontend. The access point is, by default, set as a home directory (`/storage/plzen1/home/$USER/`).
 
-<p align="center"><img src="./figs/03_cyberduck.png"></p>
+<p align="center"><img src="./figs/03_cyberduck.png" width="600"></p>
+
+After the configuration, you can manually download the same files and folder as we did before through the terminal.
+
+> [!IMPORTANT]  
+> Finally, we can explore the downloaded files and evaluate the quality of raw reads...
+
+## Data upload
+
+Data upload for users of FTP/SFTP clients works as easily as download. They mainly work with the `Drag-and-drop` technique or the `Upload` option. The `scp` command also works similarly, only destinations are switched. In general: `scp /path/to/any/folder/or/file/on/my/computer user_name@server_name:/path/where/to/save/it`.
+
+```shell
+mv ONT_raw_SRR24321377.fastq ONT_raw_SRR24321377.fastq_renamed
+scp /local/path/ONT_raw_SRR24321377.fastq_renamed user_name@storage-plzen1.metacentrum.cz:
+# alternatively:
+scp /local/path/ONT_raw_SRR24321377.fastq_renamed user_name@nympha.metacentrum.cz:
+```
+> [!TIP]
+> For a copy of a folder through `scp`, it is necessary to use the `-r` flag. When the folder is compressed (for example, `folder.gz`), the `-r` flag is not required because the compressed file is handled as a single file.
+
+> [!WARNING]  
+> Although you do not need to specify the path where to save something on the remote server (in the `scp` command), the colon character `:` after the server name is still required.
+> ```shell
+> scp -r /local/path/folder user_name@storage-plzen1.metacentrum.cz:
+> ```
+
+## Data transfer between storages
+
+> [!TIP]
+> Before transferring big data (a few TBs), you can email MetaCentrum user support (meta@cesnet.cz) and discuss the optimal strategy. Alternatively, we can transfer data for you.
+
+Small data volumes can be transferred between storages directly from frontends by traditional commands `cp` and `mv`.
+
+```shell
+cp /storage/plzen1/home/$USER/ONT_raw_SRR24321377.fastq /storage/brno12-cerit/home/$USER
+ls /storage/brno12-cerit/home/$USER
+rm /storage/brno12-cerit/home/$USER
+```
+
+The same strategy can be applied for data transfer to and from the scratch directory within interactive and batch jobs.
+
+```shell
+cp /storage/plzen1/home/$USER/ONT_raw_SRR24321377.fastq $SCRATCHDIR
+mv $SCRATCHDIR/output.txt /storage/plzen1/home/$USER
+```
+
+Is it more suitable to transfer large volumes of data by the `scp` command from/to/between individual [NFS4 storages](https://wiki.metacentrum.cz/wiki/NFS4_Servery). Let's try to solve a few examples...
+
+```shell
+scp /storage/plzen1/home/$USER/ONT_raw_SRR24321377.fastq storage-brno12-cerit.metacentrum.cz:~
+ls /storage/brno12-cerit/home/$USER
+```
+
+```shell
+scp -r /storage/plzen1/home/$USER/ont_outdir storage-brno12-cerit.metacentrum.cz:~
+ls /storage/brno12-cerit/home/$USER
+```
+
+```shell
+cd /storage/plzen1/home/$USER/
+scp ONT_raw_SRR24321377.fastq storage-brno12-cerit.metacentrum.cz:~
+```
+
+```shell
+scp storage-brno12-cerit.metacentrum.cz:~/ONT_raw_SRR24321377.fastq /storage/plzen1/home/$USER/
+```
+
+```shell
+scp storage-plzen1.metacentrum.cz:~/ONT_raw_SRR24321377.fastq storage-brno12-cerit.metacentrum.cz:~
+```
+
+## Data backup and archiving
+
+MetaCentrum offers a simple way how to backup and archive valuable data.
+
+# Genome assembly
+
+```shell
+#!/bin/bash
+#PBS -q MetaSeminar
+#PBS -l walltime=01:00:00
+#PBS -l select=1:ncpus=2:mem=12gb:scratch_local=10gb
+#PBS -N Batch_test_assembly
+
+# test if a scratch directory exists
+test -n "$SCRATCHDIR" || { echo >&2 "Variable SCRATCHDIR is not set!"; exit 1; }
+
+# set a DATADIR variable
+DATADIR=/storage/plzen1/home/$USER
+
+# copy input file "data.fa" to the scratch directory
+cp $DATADIR/Illumina_raw_SRR24321378_*.fastq $SCRATCHDIR || { echo >&2 "Error while copying Illumina input files!"; exit 2; }
+cp $DATADIR/ONT_raw_SRR24321377.fastq $SCRATCHDIR || { echo >&2 "Error while copying ONT input file!"; exit 2; }
+
+# move into the scratch directory
+cd $SCRATCHDIR
+
+head -n 4000000 Illumina_raw_SRR24321378_1.fastq > Illumina_raw_SRR24321378_1_partial.fastq
+head -n 4000000 Illumina_raw_SRR24321378_2.fastq > Illumina_raw_SRR24321378_2_partial.fastq
+head -n 10000 ONT_raw_SRR24321377.fastq > ONT_raw_SRR24321377_partial.fastq
+
+# load a module for your application
+module add unicycler/0.5.0
+
+# run the calculation
+unicycler-runner.py -1 Illumina_raw_SRR24321378_1_partial.fastq -2 Illumina_raw_SRR24321378_2_partial.fastq \
+-l ONT_raw_SRR24321377_partial.fastq -o out_directory -t 2 --kmers 21 --kmer_count 12
+
+#copy results
+mv out_directory/assembly.fasta $DATADIR || { echo >&2 "Result file(s) copying failed (with a code $?) !!"; exit 4; }
+
+# clean the scratch directory
+clean_scratch
+```
+
 
 
 
