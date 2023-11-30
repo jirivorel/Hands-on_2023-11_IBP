@@ -77,6 +77,7 @@ The following data and software tools will be used during the course:
  - [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/) for quality control of Illumina reads
  - [NanoPlot](https://github.com/wdecoster/NanoPlot) for quality control of Oxford Nanopore reads
  - [Unicycler](https://github.com/rrwick/Unicycler) for genome assembly
+ - [QUAST](https://quast.sourceforge.net/) for assembly quality assessment
 
 ## Useful links
  - [MetaCentrum terms and conditions](https://docs.metacentrum.cz/access/terms/)
@@ -329,6 +330,9 @@ qsub -I -l select=1:ncpus=2:mem=10gb:scratch_local=20gb -l walltime=2:00:00 -q M
 | `scratch_local=20gb` | Reserves 20 GB of disk space on scratch. |
 | `walltime=2:00:00` | Reserves two hours for the job. |
 | `-q MetaSeminar` | Submits job into queue MetaSeminar. |
+
+> [!TIP]
+> [Qsub command with the most essential parameters can be assembled online](https://metavo.metacentrum.cz/pbsmon2/qsub_pbspro).
 
 After starting the job, go to the scratch directory, defined as the variable SCRATCHDIR.
 
@@ -597,15 +601,72 @@ scp storage-plzen1.metacentrum.cz:~/ONT_raw_SRR24321377.fastq storage-brno12-cer
 
 ## Data backup and archiving
 
-MetaCentrum offers a simple way how to backup and archive valuable data.
+> [!NOTE]  
+> MetaCentrum storages are dedicated to data in active use. Unnecessary data of permanent value should be archived in a [suitable place](https://docs.metacentrum.cz/data/backup-archive/).
+
+> [!IMPORTANT]  
+> MetaCentrum storages are not backed up on other servers. Data on storage is backed up on the same server in the form of snapshots. **The snapshots are kept at least 14 days backwards**. In the event of a catastrophic storage failure, data may be irretrievably lost.  
+
+MetaCentrum users can use additional storage capacity provided by the [CESNET Storage Department](https://du.cesnet.cz/en/start). This storage capacity represents a simple way to back up and archive valuable data. The data is kept in several physical copies, so there is no risk of losing it due to a hardware failure.
+
+Two special storages are mounted as: 
+- `/storage/du-cesnet/home/$USER/VO_metacentrum-tape_tape-archive` - this archive storage keeps data "forever".
+- `/storage/du-cesnet/home/$USER/VO_metacentrum-tape_tape` - backup storage with a life cycle of 12 months.
+
+> [!IMPORTANT]  
+> Do not leave data in the home directory of this storage, i.e. in `/storage/du-cesnet/home/$USER`/. The data quota here is set very low (~50 MB).
+
+> [!IMPORTANT]  
+> As on most other storages, there are also applied quotas for the volume of data and the total number of files. Quotas can be [reviewed in the PBSmon](http://metavo.metacentrum.cz/en/myaccount/kvoty).
+
+Storages for archiving and backuping are accessible as other MetaCentrum storage. Try to execute the following examples:
+
+```shell
+cp ONT_raw_SRR24321377.fastq /storage/du-cesnet/home/$USER/VO_metacentrum-tape_tape-archive/
+```
+
+```shell
+scp ONT_raw_SRR24321377.fastq storage-du-cesnet.metacentrum.cz:~/VO_metacentrum-tape_tape-archive
+```
+
+> [!WARNING]  
+> The default home directory on the server `storage-du-cesnet.metacentrum.cz` is set as `/storage/du-cesnet/home/$USER/`. And it is not allowed to write to this home directory. Always specify a path `~/VO_metacentrum-tape_tape-archive` or `~/VO_metacentrum-tape_tape` when you use the `scp` command.
+
+```shell
+scp storage-plzen1.metacentrum.cz:~/ONT_raw_SRR24321377.fastq storage-du-cesnet.metacentrum.cz:~/VO_metacentrum-tape_tape-archive
+```
+
+```shell
+scp storage-du-cesnet.metacentrum.cz:~/VO_metacentrum-tape_tape-archive/ONT_raw_SRR24321377.fastq storage-plzen1.metacentrum.cz
+```
+
+> [!NOTE]  
+> Storage du-cesnet is based on different technology and is significantly slower than other MetaCentrum storages. For that reason, it is recommended:
+> - archive/backup compressed files.
+> - use faster approaches than `cp` or `mv` commands for data upload.
+> - do not use this storage for calculations.
+> -  if you need to search or decompress a large archive, create a copy on another (faster) MetaCentra storage.
+
+> [!TIP]
+> Access with WinSCP or FileZilla can be configured based on this [tutorial](https://du.cesnet.cz/en/navody/winscp/start), respective this [one](https://du.cesnet.cz/cs/navody/filezilla/start). Server address is `ftp.du4.cesnet.cz`.
 
 # Genome assembly
+
+In the final chapter of this course, we will do a genome assembly from previously downloaded data. As we decided, we will use unprocessed raw reads for our humble testing purposes.
+
+Create a new and empty file in your home directory (preferably `/storage/plzen1/home/$USER`).
+
+```shell
+touch run_batch_assembly.sh
+```
+
+Open this file in the `nano` text editor as `nano run_batch_assembly.sh` and paste the entire content of the following script into the text editor.
 
 ```shell
 #!/bin/bash
 #PBS -q MetaSeminar
 #PBS -l walltime=01:00:00
-#PBS -l select=1:ncpus=2:mem=12gb:scratch_local=10gb
+#PBS -l select=1:ncpus=2:mem=15gb:scratch_local=20gb
 #PBS -N Batch_test_assembly
 
 # test if a scratch directory exists
@@ -614,11 +675,11 @@ test -n "$SCRATCHDIR" || { echo >&2 "Variable SCRATCHDIR is not set!"; exit 1; }
 # set a DATADIR variable
 DATADIR=/storage/plzen1/home/$USER
 
-# copy input file "data.fa" to the scratch directory
+# copy input files to the scratch directory
 cp $DATADIR/Illumina_raw_SRR24321378_*.fastq $SCRATCHDIR || { echo >&2 "Error while copying Illumina input files!"; exit 2; }
 cp $DATADIR/ONT_raw_SRR24321377.fastq $SCRATCHDIR || { echo >&2 "Error while copying ONT input file!"; exit 2; }
 
-# move into the scratch directory
+# go to the scratch directory
 cd $SCRATCHDIR
 
 head -n 4000000 Illumina_raw_SRR24321378_1.fastq > Illumina_raw_SRR24321378_1_partial.fastq
@@ -632,12 +693,46 @@ module add unicycler/0.5.0
 unicycler-runner.py -1 Illumina_raw_SRR24321378_1_partial.fastq -2 Illumina_raw_SRR24321378_2_partial.fastq \
 -l ONT_raw_SRR24321377_partial.fastq -o out_directory -t 2 --kmers 21 --kmer_count 12
 
-#copy results
+# move results
 mv out_directory/assembly.fasta $DATADIR || { echo >&2 "Result file(s) copying failed (with a code $?) !!"; exit 4; }
 
 # clean the scratch directory
 clean_scratch
 ```
+
+As we are limited by time and hardware resources dedicated to this course, **we will subsample Illumina reads on 1,000,000 pairs and Oxford Nanopore reads on 2,500 reads to reduce the run time**. The only desired output is the fasta file `assembly.fasta` with the assembled genome.
+
+> [!CAUTION]
+> A subsampling technique used in the batch script (`head -n 4000000...`) is wrong and should never be used for serious processing of scientific data. 
+
+> [!NOTE]  
+> With the current setting, the expected runtime is ~30 minutes.
+
+The prepared script can be submitted to the scheduling system.
+
+```shell
+qsub run_batch_assembly.sh
+```
+
+In the final step, we will compare the basic characteristics of our assembly with the published [one](https://journals.asm.org/doi/10.1128/mra.00363-23). In the interactive job, we will use the QUAST tool; the procedure is following.
+
+```shell
+qsub -I -l select=1:ncpus=2:mem=10gb:scratch_local=20gb -l walltime=1:00:00 -q MetaSeminar
+cd $SCRATCHDIR
+cp /storage/plzen1/home/$USER/assembly.fasta .
+module add conda-modules
+conda activate quast_v5.2.0_py3.9
+quast -o out_dir -t 2 --fast assembly.fasta
+cat out_dir/report.txt
+clean_scratch
+exit
+```
+
+
+
+
+
+
 
 
 
